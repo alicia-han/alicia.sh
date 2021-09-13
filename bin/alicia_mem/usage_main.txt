@@ -1,0 +1,19 @@
+
+      Usage: alicia.sh [-h]
+
+      PARAMETRES:
+      ===========
+          mem       Some Important Stickers
+          git       Switch between git profiles
+          gcp       gcp project switch
+          gke       gke profile switch
+          gke-ns    gke namespace switch
+          swith     quickly switch between environments
+
+      OPTIONS:
+      ========
+          -h    Affiche ce message
+
+      EXAMPLES:
+      =========
+          alicia.sh mem help

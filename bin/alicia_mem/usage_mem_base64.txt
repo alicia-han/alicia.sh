@@ -1,0 +1,7 @@
+# Encrypt
+echo -n 'scottlinux.com rocks' | base64
+c2NvdHRsaW51eC5jb20gcm9ja3MK
+
+# Decrypt
+$ echo -n c2NvdHRsaW51eC5jb20gcm9ja3MK | base64 -d
+scottlinux.com rocks

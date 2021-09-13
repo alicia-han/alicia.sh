@@ -1,0 +1,4 @@
+## For Linux Ubuntu 18 
+
+sudo systemd-resolve --flush-caches
+sudo system-resolve --statistics

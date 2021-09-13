@@ -1,0 +1,314 @@
+#IPTABLES
+
+## iptables 基础
+
+- rules：预定的条件
+- chains： 传播的途径
+- tables： 
+ - filter: 系统默认
+   INPUT： 进入的包
+   FORWARD： 转发的包
+   OUTPUT： 处理本地生成的包
+ - nat
+   PREROUTING 即将到来的数据包
+   OUTPUT 在路由之前 本地生成的数据包
+   POSTROUTING 即将出去的数据包
+ - mangle: prerouting output fowward postrouting input
+
+## IPTABLS 命令
+
+动作选项： 
+
+ACCEPT：    接受数据包
+DROP：      抛弃
+REDIRECT：  重定向到本机或者另一主机的某一个端口 用来开放内网服务
+SNAT：      源地址转换
+DNAT：      目的地址转换
+MASQUERADE  IP伪装
+LOG         日志
+
+## 例子：
+
+1. iptables -t filter -A INPUT -s 192.168.1.5 -i eth0 -j DROP
+
+禁止192.168.1.5 从eth0 访问主机
+
+2. iptables -t filter -I INPUT 2 -s 192.168.5.0/24 -p tcp --dport 80 -j DROP
+
+禁止子网192.168.5.0访问web服务
+
+3. iptables -t filter -I INPUT 2 -s 192.168.7.9 -p tcp --dport ftp -j DROP
+
+禁止IP为192.168.7.9访问FTP服务
+
+4.iptables -t filter -L INPUT
+
+查看filter表中INPUT链的规则
+
+5. iptables -t nat -F
+
+删除nat表中的所有规则
+
+6. iptables -I FORWARD -d wwww.playboy.com -j DROP
+
+禁止访问www.playboy.com网站
+
+7. iptables -I FORWARD -s 192.168.5.23 -j DROP
+
+禁止192.168.5.23上网
+
+## More
+
+一 ：从一台机到另一台机端口转发
+
+启用网卡转发功能
+#echo 1 > /proc/sys/net/ipv4/ip_forward
+
+举例:从192.168.0.132:21521(新端口)访问192.168.0.211:1521端口
+
+
+a.同一端口转发
+
+(192.168.0.132上开通1521端口访问 iptables -A RH-Firewall-1-INPUT -m state --state NEW -m tcp -p tcp --dport 1521 -j ACCEPT)
+
+iptables -t nat -I PREROUTING -p tcp --dport 1521 -j DNAT --to 192.168.0.211
+iptables -t nat -I POSTROUTING -p tcp --dport 1521 -j MASQUERADE
+
+b.不同端口转发
+
+(192.168.0.132上开通21521端口访问 iptables -A RH-Firewall-1-INPUT -m state --state NEW -m tcp -p tcp --dport 21521 -j ACCEPT)
+
+iptables -t nat -A PREROUTING -p tcp -m tcp --dport21521 -j DNAT --to-destination192.168.0.211:1521
+iptables -t nat -A POSTROUTING -s 192.168.0.0/16 -d 192.168.0.211 -p tcp -m tcp --dport 1521 -j SNAT --to-source 192.168.0.132
+
+以上两条等价配置(更简单[指定网卡]):
+iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 31521 -j DNAT --to 192.168.0.211:1521
+iptables -t nat -A POSTROUTING -j MASQUERADE
+
+保存iptables
+#service iptables save
+#service iptables restart
+
+
+二 用iptables做本机端口转发
+
+代码如下：
+   iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-ports 8080
+
+估计适当增加其它的参数也可以做不同IP的端口转发。
+
+如果需要本机也可以访问，则需要配置OUTPUT链(********特别注意:本机访问外网的端口会转发到本地,导致访不到外网,如访问yown.com,实际上是访问到本地,建议不做80端口的转发或者指定目的 -d localhost)：
+  iptables -t nat -A OUTPUT -d localhost -p tcp --dport 80 -j REDIRECT --to-ports 8080
+
+原因：
+外网访问需要经过PREROUTING链，但是localhost不经过该链，因此需要用OUTPUT。
+
+例子1：
+
+概述：
+
+      有一些核心MYSQL服务器位于核心机房的内网段，经常需要去连接这些服务器，因无法直接通过外网访问，给管理造成了不便。
+思路：
+
+      虽然解决此问题的方法及思路有很多，但当下想使用IPTABLES的端口重定向功能解决此问题，比较简单易用，而且扩展性也比较好，依次类推，可以运用到其他的端口转发方面的应用。
+网络环境：
+公网服务器      ：eth0:公网IP    eth1:内网IP - 192.168.1.1
+MYSQL服务器：eth1:内网IP - 192.168.1.2
+实现方法：通过访问公网IP的63306端口来实现到内网MYSQL服务器的3306端口的访问
+在公网服务器上：
+配置脚本：
+iptables -t nat -A PREROUTING -p tcp --dport 63306 -j DNAT --to-destination 192.168.1.2:3306
+iptables -t nat -A POSTROUTING -d 192.168.1.2 -p tcp --dport 3306 -j SNAT --to 192.168.1.1
+
+允许服务器的IP转发功能：
+
+echo 1 > /proc/sys/net/ipv4/ip_forward
+使用方法：
+mysql -h 公网IP -p 63306 -uroot -p
+
+例子2：
+
+     由于业务需要，服务器越来越多，内网服务器无外网环境管理甚是不便，所以折腾了一下外网到内网的端口转发以达到轻松管理的目的，贴一下心得。
+
+S1:
+eth0 10.0.0.1
+eth1 x.x.x.x
+
+S2:
+eth0 10.0.0.2
+
+S1 8082端口转发到内网机器22端口
+
+iptables规则配置如下：
+
+iptables -t nat -A PREROUTING -d x.x.x.x -p tcp --dport 8082 -j DNAT --to-destination 10.0.0.2:22
+
+iptables -t nat -A POSTROUTING -d 10.0.0.2 -p tcp --dport 22 -j SNAT --to-source x.x.x.x
+
+说明：
+iptables -t nat -A PREROUTING -d "对外公网ip" -p tcp --dport "对外端口" -j DNAT --to "内部实际提供服务的ip":"实际提供服务的端口"
+
+iptables -t nat -A POSTROUTING -d "内部实际提供服务的ip"-p tcp --dport "实际提供服务的端口" -j SNAT --to-source "运行iptables机器的内网ip"
+
+
+
+另外，网上看到一篇很好的文章，这里转发一下：https://icewing.cc/post/25-iptables-policy.html
+
+25个最常用的iptables策略
+
+1、清空存在的策略
+
+当你开始创建新的策略，你可能想清除所有的默认策略，和存在的策略，可以这么做：
+
+iptables -F 或者iptables –flush
+2、设置默认策略
+
+默认链策略是ACCEPT，改变所有的链策略为DROP:
+
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT DROP
+3、阻止一个指定的ip
+
+BLOCK_THIS_IP=“x.x.x.x"
+iptables -A INPUT -s ”$BLOCK_THIS_IP“ -j DROP
+iptables -A INPUT -i eth0 -s "$BLOCK_THIS_IP" -j DROP
+iptables -A INPUT -i eth0 -p tcp -s "$BLOCK_THIS_IP" -j DROP
+4、允许SSH
+
+允许所有通过eth0接口使用ssh协议连接本机：
+
+iptables -A INPUT -i eth0 -p tcp -dport 22 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -o eth0 -p tcp -sport 22 -m state -state ESTABLISHED -j ACCEPT
+5、允许某个网段通过ssh连接
+
+iptables -A INPUT -i eth0 -p tcp -s 192.168.100.0/24 –dport 22 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -o eth0 -p tcp -sport 22 -m state –state ESTABLISHED -j ACCEPT
+6、允许SSH连接指定的网段
+
+iptables -A OUTPUT -o eth0 -p tcp -d 192.168.100.0/24 -dport 22 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -i eth0 -p tcp -sport 22 -m state -state ESTABLISHED -j ACCEPT
+7、允许http和https
+
+允许所有进来的web流量：http协议80端口，https协议是443端口
+
+iptables -A INPUT -i eth0 -p tcp -dport 80 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -o eth0 -p tcp -sport 80 -m state -state ESTABLISHED -j ACCEPT
+
+
+iptables -A INPUT -i eth0 -p tcp -dport 443 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -o eth0 -p tcp -sport 443 -m state -state ESTABLISHED -j ACCEPT
+8、多个策略联合一起
+
+允许ssh，http，https：
+
+iptables -A INPUT -i eth0 -p tcp -m multiport -dports 22,80,443 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -o eth0 -p tcp -m multiport -sports 22,80,443 -m state -state ESTABLISHED -j ACCEPT
+9、允许SSH连接其他主机
+
+iptables -A OUTPUT -o eth0 -p tcp -dport 22 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -i eth0 -p tcp -sport 22 -m state -state ESTABLISHED -j ACCEPT
+10、允许https出去
+
+iptables -A OUTPUT -o eth0 -p tcp -dport 443 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -i eth0 -p tcp -sport 443 -m state -state ESTABLISHED -j ACCEPT
+11、对web请求做负载均衡(每三个包，均衡到指定服务器，需要扩展iptables)
+
+iptables -A PREROUTING -i eth0 -p tcp –dport 443 -m state -state NEW -m nth -counter 0 -every 3 -packet 0 -j DNAT -to-destination 192.168.1.101:443
+iptables -A PREROUTING -i eth0 -p tcp –dport 443 -m state -state NEW -m nth -counter 0 -every 3 -packet 1 -j DNAT -to-destination 192.168.1.102:443
+iptables -A PREROUTING -i eth0 -p tcp –dport 443 -m state -state NEW -m nth -counter 0 -every 3 -packet 2 -j DNAT -to-destination 192.168.1.103:443
+12、允许ping
+
+iptables -A INPUT -p icmp -icmp-type echo-request -j ACCEPT
+iptables -A OUTPUT -p icmp -icmp-type echo-reply -j ACCEPT
+13、允许ping远程
+
+iptables -A OUTPUT -p icmp -icmp-type echo-request -j ACCEPT
+iptables -A INPUT -p icmp -icmp-type echo-reply -j ACCEPT
+14、允许本地回环
+
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+15、允许内网访问外部网络
+
+这个例子eth1 连接外部网络，eth0连接内部网络
+
+iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT
+16、允许DNS出去
+
+iptables -A OUTPUT -p udp -o eth0 -dport 53 -j ACCEPT
+iptables -A INPUT -p udp -i eth0 -sport 53 -j ACCEPT
+17、允许NIS连接
+
+NIS端口是动态的，当ypbind启动时它分配端口。
+
+首先运行 rpcinfo -p 显示得到端口号，这个例子使用端口850,853。
+
+iptables -A INPUT -p tcp -dport 111 -j ACCEPT
+iptables -A INPUT -p udp -dport 111 -j ACCEPT
+iptables -A INPUT -p tcp -dport 853 -j ACCEPT
+iptables -A INPUT -p udp -dport 853 -j ACCEPT
+iptables -A INPUT -p tcp -dport 850 -j ACCEPT
+iptables -A INPUT -p udp -dport 850 -j ACCEPT
+上面的例子当ypbind重新启动时将失效，有2种解决方案：
+
+(1) 分配nis服务静态ip
+
+(2) 使用精妙的脚本
+
+18、允许指定网段连接Rsync
+
+iptables -A INPUT -i eth0 -p tcp -s 192.168.101.0/24 -dport 873 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -o eth0 -p tcp -sport 873 -m state -state ESTABLISHED -j ACCEPT
+19、允许mysql从指定的网段连接
+
+iptables -A INPUT -i eth0 -p tcp -s 192.168.100.0/24 -dport 3306 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -o eth0 -p tcp -sport 3306 -m state -state ESTABLISHED -j ACCEPT
+20、允许sendmail或者postfix
+
+iptables -A INPUT -i eth0 -p tcp -dport 25 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -o eth0 -p tcp -sport 25 -m state -state ESTABLISHED -j ACCEPT
+21、允许IMAP和IMAPS
+
+iptables -A INPUT -i eth0 -p tcp -dport 143 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -o eth0 -p tcp -sport 143 -m state -state ESTABLISHED -j ACCEPT
+
+iptables -A INPUT -i eth0 -p tcp -dport 993 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -o eth0 -p tcp -sport 993 -m state -state ESTABLISHED -j ACCEPT
+22、允许POP3和POP3S
+
+iptables -A INPUT -i eth0 -p tcp -dport 110 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -o eth0 -p tcp -sport 110 -m state -state ESTABLISHED -j ACCEPT
+
+iptables -A INPUT -i eth0 -p tcp -dport 995 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -o eth0 -p tcp -sport 995 -m state -state ESTABLISHED -j ACCEPT
+23、预防DDOS攻击
+
+iptables -A INPUT -p tcp -dport 80 -m limit -limit 25/minute -limit-burst 100 -j ACCEPT
+-m ：使用iptables扩展
+–limit 25/minute : 限制分钟连接请求数
+–limit-burst：触发阀值，一次涌入数据包数量
+24、端口转发
+
+来自442的都转到22端口
+
+iptables -t nat -A PREROUTING -p tcp -d 192.168.102.37 -dport 422 -j DNAT -to 192.168.102.37:22
+你还必须明确允许442端口
+
+iptables -A INPUT -i eth0 -p tcp -dport 422 -m state -state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -o eth0 -p tcp -sport 422 -m state -state ESTABLISHED -j ACCEPT
+25、包丢弃日志
+
+你也许想查看所有丢弃包的日志。首先创建一个新链叫 LOGGING
+
+iptables -N LOGGING
+确保所有的连接跳到LOGGING
+
+iptables -A INPUT -j LOGGING
+记录这些包通过自定义名字 "log-prefix"
+
+iptables -A LOGGING -m limit -limit 2/min -j LOG -log-prefix "IPTables Packet Dropped:" -log-level 7
+最后丢弃这些数据包
+
+iptables -A LOGGING -j DROP
+

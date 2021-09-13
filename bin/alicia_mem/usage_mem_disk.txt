@@ -1,0 +1,31 @@
+## Format Disk
+/sbin/parted -s /dev/sdb mklabel gpt && sleep 2 &&\
+/sbin/parted -s -a opt /dev/sdb mkpart primary ext4 0% 100% && sleep 2 &&\
+/sbin/mkfs.ext4 /dev/sdb1
+
+## Disk volume up
+fdisk -l
+lsblk
+sudo resize2fs /dev/$DEVICE_IDPARTITION_NUMBER
+
+## Disk Volume Up AWS
+
+apt install cloud-guest-utils
+growpart /dev/xvdh1
+
+## Check if ssd Device
+cat /sys/block/sda/queue/rotaional
+0 <- SSD
+1 <- HDD
+
+
+
+## Proxmox Disk
+
+Sur Server:  qm resize 113 scsi1 +200G
+
+In Worker: 
+
+sudo growpart /dev/sdb 1
+sudo resize2fs /dev/sdb1
+

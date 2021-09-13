@@ -1,0 +1,2 @@
+ curl -X POST -H 'Content-Type: application/json' -d @./ingrestion1.json http://vm2-druidmaster1:8081/druid/indexer
+/v1/supervisor

@@ -1,0 +1,9 @@
+------- find files older than 10 days
+
+find /tmp -type f -mtime +10 # count from the beginning of the day
+find /tmp -type f -mtime +10 -delete # delete them
+sudo find /tmp -type f -mmin +1440 -delete  # count from now. 
+
+-------- find files bigger than xxx
+find ~ -type f -size +2k  -exec ls -alh {} \\;
+

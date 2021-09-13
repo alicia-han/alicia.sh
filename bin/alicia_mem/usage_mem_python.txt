@@ -1,0 +1,15 @@
+### VENV Construction
+
+sudo apt-get install python3-venv
+sudo mkdir beta-test
+sudo chown aliciahan -R ./beta-test
+python3 -m venv beta-test
+source bin/activate
+
+pip freeze > requirements.txt
+python -m pip install -r requirements.txt
+
+
+pip list
+
+pip show <package-name>

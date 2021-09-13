@@ -1,0 +1,7 @@
+### Change sudoer setting
+
+sudo visudo
+
+### No password for sudo 
+
+ahan  ALL=(ALL) NOPASSWD:ALL

@@ -1,0 +1,18 @@
+   kafka-topics.sh --bootstrap-server vm2-edgebuffer1:9092,vm2-edgebuffer2:9092,vm2-edgebuffer3:9092 --delete --topic data-nvidia1
+   kafka-topics.sh --bootstrap-server vm2-edgebuffer1:9092,vm2-edgebuffer2:9092,vm2-edgebuffer3:9092 --create --topic data-nvidia1 --partitions 2 --replication-factor 2
+   kafka-topics.sh --bootstrap-server vm2-edgebuffer1:9092,vm2-edgebuffer2:9092,vm2-edgebuffer3:9092 --list
+
+   ### Clean Topic 
+export TOPIC_TO_VIDE=data-nvidia1 &&\
+/opt/kafka/bin/kafka-configs.sh \
+--bootstrap-server vm2-edgebuffer1:9092,vm2-edgebuffer2:9092,vm2-edgebuffer3:9092 \
+--alter --entity-type topics --entity-name $TOPIC_TO_VIDE --add-config retention.ms=1000 &&\
+sleep 5
+/opt/kafka/bin/kafka-configs.sh 
+--bootstrap-server vm2-edgebuffer1:9092,vm2-edgebuffer2:9092,vm2-edgebuffer3:9092 
+--alter --entity-type topics --entity-name $TOPIC_TO_VIDE --delete-config retention.ms
+
+
+### Read Topic 
+
+ /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server vm2-edgebuffer1:9092 --topic client1-ID-2KHZ

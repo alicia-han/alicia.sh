@@ -1,0 +1,5 @@
+--- Print the last column
+    awk '{print $NF}'
+
+--- Remove Tiele, print col 1,2,3 with 1:2 3
+docker images | awk 'NR>1' | awk '{printf "%s:%s %s",$1,$2,$3}'

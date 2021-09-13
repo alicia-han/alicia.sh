@@ -1,0 +1,4 @@
+### Trace start up
+
+journalctl -u ServiceName -f
+

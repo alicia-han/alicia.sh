@@ -1,0 +1,5 @@
+# Check helm release history
+helm history RELEASE_NAME [flags]
+
+# Roll back up a revision 
+helm rollback <RELEASE> [REVISION] [flags]

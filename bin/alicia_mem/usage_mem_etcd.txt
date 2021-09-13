@@ -1,0 +1,13 @@
+curl --cacert ./certs/ca.pem --cert ./certs/vm2-edgebuffer1.pem --key ./certs/vm2-edgebuffer1-key.pem https://10.1.0.32:2379/health
+{"health":"true"}
+
+
+etcdctl --endpoints https://10.1.0.30:2379 \
+    --cacert ./certs/ca.pem \
+    --cert ./certs/vm2-edgebuffer1.pem \
+    --key ./certs/vm2-edgebuffer1-key.pem \
+    member list
+
+
+etcdctl --endpoints https://10.0.0.60:2379 --cert /etc/etcd/server.crt --cacert /etc/etcd/etcd-ca.crt --key /etc/etcd/server.key put foo bar
+etcdctl --endpoints https://10.0.0.60:2379 --cert /etc/etcd/server.crt --cacert /etc/etcd/etcd-ca.crt --key /etc/etcd/server.key get foo

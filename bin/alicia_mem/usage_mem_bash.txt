@@ -1,0 +1,39 @@
+
+----No HUP 
+nohup APP > /dev/null 2>&1 &
+----For in one line
+for i in words; do echo "hello"; done
+---- =~ in /bin/sh env
+if [ -z "${string##*$reqsubstr*}" ]; then 
+# if we replace from the left the string with sub string, the zero should be 0
+---- 
+
+---- For Range: 
+rangei=0;rangen=10;while [[ "$rangei" -lt $rangen ]]; do echo  $rangei; rangei=$(expr $rangei + 1);done
+
+--- Print Lines 
+sed -n 5,8p file
+
+--- Remove Line:
+ sed '1d' file 
+ sed '2,4d' file Remove from lien 2 to 4
+ sed '1d;$d' file delete first and last line 
+
+---iptables
+sudo iptables --list sshguard --line-numbers --numeric
+iptables --delete sshguard LINE_NUMBER
+
+--- s3 bucket
+
+aws s3 sync . s3://dev-r-platform/price_affinity/ --include=".gz"
+
+--- Rename 
+
+remove the name extension:
+  for var in *.erb; do mv $var $(echo $var | sed "s/.erb$//g"); done
+
+--- Multiple Lines to File
+cat <<EOT >> greetings.txt
+line 1
+line 2
+EOT

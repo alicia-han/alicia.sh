@@ -1,0 +1,22 @@
+configurations:
+- name: "credential.helper"
+  value: "osxkeychain"
+  options: "--global"
+- name: "user.name"
+  value: "Alicia HAN"
+  options: "--global"
+- name: "user.email"
+  value: "alicia.han.fr@gmail.com"
+  options: "--global"
+- name: "pull.rebase"
+  value: "false"
+  options: "--global"
+ssh:
+  file_name: "/Users/aliciahan/Dropbox/configurations/ssh_configs/config.d/github"
+  value: |-
+    Host github.com
+      HostName github.com
+      User git
+      Port 22
+      IdentityFile  ~/Dropbox/configurations/ssh_configs/keys/id_rsa
+      ForwardAgent no

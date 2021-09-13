@@ -1,0 +1,45 @@
+# Setting up NAT
+
+post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+post-up   iptables -t nat -A POSTROUTING -s '10.0.0.0/24' -o vmbr0 -j MASQUERADE
+post-down iptables -t nat -D POSTROUTING -s '10.0.0.0/24' -o vmbr0 -j MASQUERADE
+
+# List ipv4 rules
+
+iptables -S
+
+# All Tables rules
+
+iptables -L -v -n | less
+
+# NAT rules
+
+iptables -t nat -L
+
+# Others
+
+# iptables -t filter -L
+# iptables -t raw -L
+# iptables -t security -L
+# iptables -t mangle -L
+# iptables -t nat -L
+
+
+PACKET IN
+    |
+PREROUTING--[routing]-->--FORWARD-->--POSTROUTING-->--OUT
+ - nat (dst)   |           - filter      - nat (src)
+               |                            |
+               |                            |
+              INPUT                       OUTPUT
+              - filter                    - nat (dst)
+               |                          - filter
+               |                            |
+               `----->-----[app]----->------'
+
+Internet---------[router/firewall]-------------LAN
+0.0.0.0/0      7.8.9.10    192.168.1.1    192.168.1.0/24
+
+# DELETE
+sudo iptables -t NAT -L -v -n --line-numbers
+sudo iptables -D INPUT 3

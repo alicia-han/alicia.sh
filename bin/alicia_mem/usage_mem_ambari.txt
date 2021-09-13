@@ -1,0 +1,17 @@
+### Check services in a host:
+curl -u admin:admin -H "X-Requested-By: ambari" -X GET http://vm-master1.skfs2m.com:8080/api/v1/clusters/inthdp/hosts/vm-edge1.skfs2m.com
+### Delete
+curl -u admin:admin -H "X-Requested-By: ambari" -X DELETE http://AMBARI_SERVER_HOST:8080/api/v1/clusters/CLUSTERNAME/hosts/HOSTNAME/host_components/ZOOKEEPER_CLIENT
+
+
+YARN Install: 
+
+	
+-----------HBase cannot be started after Express Upgrade on secured clusters.
+
+msg=org.apache.hadoop.hbase.NotServingRegionException: 
+hbase:meta,,1 is not online
+
+Clear out the data on the znode specified in ams-hbase-site:zookeeper.znode.parent.
+If Ambari Metrics System is in embedded mode, this can be done by deleting the directory as specified in the ams-hbase-site property 'HBase ZooKeeper Property DataDir'.
+If Ambari Metrics System is in distributed mode, this can be done by deleting the znode in cluster zookeeper using zkCli. Instead of deleting the znode, you canchange the value of the znode from /ams-hbase-unsecure to something like /ams-hbase-unsecure-new.

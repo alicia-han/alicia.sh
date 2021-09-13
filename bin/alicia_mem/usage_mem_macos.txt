@@ -1,0 +1,26 @@
+= Shutdown security check
+    sudo spctl --master-disable
+
+--------------Flush DNS-----------------
+sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder; say DNS cache flushed
+
+--------------Remove Security Guards-----------------
+sudo spctl --master-disable
+
+--------------Convert wmv to MP4
+ffmpeg -i input.wmv -c:v libx264 -crf 23 -c:a libfaac -q:a 100 output.mp4
+
+--------------Start Up Items
+launchctl list | grep -v "com.apple"
+launchctl remove com.microsoft.autoupdate.fba.7112 
+launchctl unload com.microsoft.autoupdate.fba.7112 
+
+## Fist Check: /Library/LaunchDaemons $ ls
+
+aliciahan@macbook-pro-1:/Library/LaunchAgents
+$ sudo rm com.microsoft.OneDriveStandaloneUpdater.plist 
+
+## Secondary Check: ~/Library/LaunchAgents
+
+aliciahan@macbook-pro-1:~/Library/LaunchAgents
+$ sudo rm com.valvesoftware.steamclean.plist

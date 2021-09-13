@@ -1,0 +1,11 @@
+
+----------------Curl with Header and Cookie------------
+curl -v --cookie "cookieName=cookieValue" --header "Accept-Language: en" --header "X-Forwarded-For: 123.123.123.123" "http://localhost:8080/somepage"
+----------------Curl with json ----------------
+curl --header "Content-Type: application/json" --request POST --data '{"username":"xyz"}' http://127.0.0.1:8080/api/login
+
+---Curl With CA
+ curl --cacert /etc/kubernetes/certs/ca.pem https://127.0.0.1:6443/healthz
+ 
+
+

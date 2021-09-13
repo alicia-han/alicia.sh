@@ -1,0 +1,2 @@
+ // Get Info From 
+ kubectl get pod -l "app=mbsuite" --output=jsonpath={.items[0].status.containerStatuses[0].imageID}

@@ -1,0 +1,4 @@
+### Check Status
+echo stat | nc <zookeeper ip> 2181
+echo mntr | nc <zookeeper ip> 2181
+echo isro | nc <zookeeper ip> 2181

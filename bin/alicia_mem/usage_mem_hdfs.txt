@@ -1,0 +1,40 @@
+## DFS Commands:
+sudo -u hdfs hdfs dfs -mkdir /raw_avro
+sudo -u hdfs hdfs dfs -chown -R root:hadoop /raw_avro
+sudo -u hdfs hdfs dfs -mkdir /user/root
+sudo -u hdfs hdfs dfs -chown root:hadoop  /user/root
+
+
+Stop Namenode and start zk and journal service before begin.
+
+Format Name Node 
+$ sudo -u hdfs hadoop namenode -format 
+
+
+Initialize the Edits (for the journal nodes)
+$ hdfs namenode -initializeSharedEdits -force 
+
+Format Zookeeper (to force zookeeper to reinitialise)
+$ hdfs zkfc -formatZK -force 
+
+Using Ambari restart the namenode
+If you are running HA name node then
+On the second namenode Sync (force synch with first namenode)
+$ hdfs namenode -bootstrapStandby -force 
+
+format namenode with CID of Datanode:
+sudo -u hdfs hdfs namenode -format -clusterId CID-15a57056-8fd8-4b75-9796-6b0710ddad8d
+
+### Save Checkpoint
+root@vm2-master2:~# sudo su - hdfs
+hdfs dfsadmin -safemode enter
+hdfs dfsadmin -saveNamespace
+hdfs dfsadmin -safemode leave
+
+### For Druid 
+su - hdfs -c "hdfs dfs -mkdir /druid"
+su - hdfs -c "hdfs dfs -chown -R druid:druid /druid"
+su - hdfs -c "hdfs dfs -chmod 775 /druid"
+
+## start namenode. java.io.FileNotFoundException: No valid image files found
+sudo su - hdfs -c "hdfs namenode -bootstrapStandby"

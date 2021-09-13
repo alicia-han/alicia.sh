@@ -1,0 +1,4 @@
+## Login Docker 
+gcloud auth login
+gcloud auth configure-docker
+gcloud auth configure-docker europe-west1-docker.pkg.dev

@@ -1,0 +1,9 @@
+#
+# Link to doc: https://ornikar.atlassian.net/wiki/spaces/CLOUD/pages/2788598588/How+to+create+or+change+a+secret+in+Vault
+
+## Switch Context: 
+alicia.sh switch fr-staging
+
+## Port-forwarding:
+echo 'https://localhost:8200' && echo "github token: ${GITHUB_TOKEN}" && kubectl port-forward pods/default-0 -n vault 8200:8200
+

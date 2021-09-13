@@ -1,0 +1,5 @@
+go test example :===========
+ go test -v model/db.go model/db_test.go -run TestSearchWithDate
+go benchmark test : ==========
+ go test -test.bench=".*" -benchmem -v
+

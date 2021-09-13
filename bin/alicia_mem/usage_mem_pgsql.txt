@@ -1,0 +1,21 @@
+#local Login
+psql -h localhost -p 5432
+
+# Show Users:
+\du OR \du+
+
+# Show DBS
+\l OR \l+
+SELECT datname FROM pg_database;
+
+
+
+## Create Super User with Password
+
+sudo su - postgres
+psql
+\du
+  select * from pg_user;
+  create user backup;
+  alter user backup with superuser;
+  alter user backup with password 'xxxxxxx';

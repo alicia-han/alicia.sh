@@ -1,0 +1,10 @@
+## When pb with terraform plan 
+terraform state list 
+terraform state rm XXXXX
+
+## When the creation is successful, but terraform would like to replace, we should untaint resources:
+
+terraform untaint  proxmox_vm_qemu.vm-masters[0]
+
+# get terrafrom secret
+terraform state pull | jq '.resources[] | select(.type == "aws_iam_access_key") | .instances[0].attributes'

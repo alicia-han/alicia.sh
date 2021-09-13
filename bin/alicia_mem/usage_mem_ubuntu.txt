@@ -1,0 +1,15 @@
+### Change default editor
+
+sudo update-alternatives --config editor
+
+
+### 查看deb包文件内容
+
+dpkg-deb -c  packageName //deb扩展名包
+dpkg -L  packageName //查看已经安装包内容
+
+### apt-file 看包
+
+apt-get install apt-file 
+apt-file update    //更新列表
+apt-file list packageName //查看包文件

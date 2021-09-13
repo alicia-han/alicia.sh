@@ -1,0 +1,4 @@
+rsync -aP ~/SourceDirectory/* username@192.168.56.100:~/Destination
+
+# Remove that was removed in source
+rsync -arvhP --dry-run  ./source/ skf-vm2-edge1:/opt/beta-test/source --delete 

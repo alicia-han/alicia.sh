@@ -1,0 +1,30 @@
+= check how many commits behinds: (master compared to origin/master)
+    git fetch && git rev-list --left-right --count master...origin/master
+= Check commits of one file
+    git log -p <File Name>
+    git log --pretty=oneline <File Name>
+    git show <hash>
+= Check diff between local and remote
+    git diff master origin/master
+
+= Reverts a commit already commited 
+    git revert xxxxxxx(the commited hash) 
+    git push
+= remove branch
+    git branch -d <BranchName>
+    git push origin --delete <BranchName>
+    git branch -a
+= remove cached ignored file
+    git rm --cached debug.log
+    git commit -m "Start ignoring debug.log"
+= Tags:
+
+Git 中的tag指向一次commit的id，通常用来给代码分支做一个标记，如标记一个版本号。
+
+## 查看标签：git tag或者git tag -l
+## 添加标签： git tag -a version_name -m "tag note"
+## 提交!指定标签!到远程仓库 ：git push origin v1.0.1
+## 提交!所有!标签到远程仓库 ：git push origin -tags
+## 删除本地标签：git tag -d version
+## 删除远程标签：git push origin :tags/version
+
