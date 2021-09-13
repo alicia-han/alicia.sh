@@ -100,7 +100,8 @@ function func_mem() {
       if [[ -f ${APP_PATH}alicia_mem/usage_mem_"${1}".txt ]]; then
         cat "${APP_PATH}alicia_mem/usage_mem_${1}.txt"
       else
-        echo -e "\033[31m [Error] No Such Option \033[0m"
+        echo -e "\033[31m [File not found \033[0m : create a new entry:"
+        vim "${APP_PATH}alicia_mem/usage_mem_${1}.txt"
       fi
     exit 0
     ;;
