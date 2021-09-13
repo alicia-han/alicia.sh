@@ -72,12 +72,15 @@ function func_git() {
 
 
 function func_mem() {
-  while getopts "h" arg
+  while getopts "he" arg
   do
     case $arg in
       h)
       usage_mem
       exit 0
+      ;;
+      e)
+      MEM_EDIT=True
       ;;
       ?)
       echo -e "\\033[31m Unknow argument \\033[0m"
@@ -98,7 +101,11 @@ function func_mem() {
     ;;
     *)
       if [[ -f ${APP_PATH}alicia_mem/usage_mem_"${1}".txt ]]; then
-        cat "${APP_PATH}alicia_mem/usage_mem_${1}.txt"
+        if [[ $MEM_EDIT == "True" ]]; then
+          vim "${APP_PATH}alicia_mem/usage_mem_${1}.txt"
+        else
+          cat "${APP_PATH}alicia_mem/usage_mem_${1}.txt"
+        fi
       else
         echo -e "\033[31m [File not found \033[0m : create a new entry:"
         vim "${APP_PATH}alicia_mem/usage_mem_${1}.txt"
